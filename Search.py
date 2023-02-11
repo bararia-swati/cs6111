@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+docdict = []
 
 def run(JsonApiKey, EngineID, query):
     url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + query
@@ -22,6 +23,7 @@ def run(JsonApiKey, EngineID, query):
             snippet = entry['snippet']
         entry = {"title": title, "link": link, "snippet": snippet, "relevance": False}
         res.append(entry)
+    docdict.append(res)
     for entry in res:
         print("RESULT " + str(i))
         print("[")
