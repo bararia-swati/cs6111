@@ -41,7 +41,7 @@ class Preprocess:
     def remove_stopwords(self, text):
         return [word for word in text if word not in self.stopwords]
 
-    def remove_punctuation_and_numbers(self, text):
+    def remove_punctuation(self, text):
         return text.translate(str.maketrans('', '', string.punctuation))
 
     def remove_duplicate_spaces(self, text):
@@ -69,10 +69,10 @@ class Preprocess:
     def preprocess(self, text):
         text = self.remove_special_characters(text)
         text = self.lowercase(text)
-        text = self.remove_punctuation_and_numbers(text)
-
         pos_tags_dict = self.pos_tagging(text)
         print("pos_tags_dict: ",pos_tags_dict)
+
+        text = self.remove_punctuation(text)
 
         text = self.remove_duplicate_spaces(text)
         text = text.split()

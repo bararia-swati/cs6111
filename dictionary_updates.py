@@ -13,5 +13,14 @@ class SparseVectorUpdates:
         for doc_id, doc_entry in docdict.items():
             processed_snippet = doc_entry['processed_snippet']
             for word in processed_snippet:
-                self.term_frequency_dict[word] += 1
-                
+                self.term_frequency_dict[(word, doc_id)] += 1
+    
+    def update_document_frequency_dict(self, docdict):
+        for doc_id, doc_entry in docdict.items():
+            processed_snippet = doc_entry['processed_snippet']
+            for word in processed_snippet:
+                self.document_frequency_dict[word] += 1
+
+
+#git command to push to a branch
+git push origin branch_name
