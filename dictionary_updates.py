@@ -38,7 +38,3 @@ class SparseVectorUpdates:
             for word in word_freq_in_snippet.keys():
                 self.document_frequency_dict[word] += 1
             
-
-
-#git command to push to a branch
-git push origin branch_name

@@ -74,6 +74,9 @@ def main():
     print()
     time.sleep(1)
     currentPrecision = 0.0
+
+    SparseVectorUpdates = SparseVectorUpdates()
+
     while currentPrecision < precision:
         docdict = run(JsonApiKey, EngineID, query)
         #print("docdict: ",docdict)
@@ -87,8 +90,18 @@ def main():
 
         doc_dict_with_processed_snippets = get_processed_text_docdict(docdict)
         print("doc_dict_with_processed_snippets: ",doc_dict_with_processed_snippets)
-        return 
-        #TODO
+        
+        #Update Sparese Vector Dictionaries
+        relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
+        non_relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == False}
+
+        SparseVectorUpdates.update_all_relevant_doc_ids(relevant_doc_dict)
+        SparseVectorUpdates.update_all_non_relevant_doc_ids(non_relevant_doc_dict)
+
+        SparseVectorUpdates.update_relevant_term_frequency_dict(relevant_doc_dict)
+        SparseVectorUpdates.update_non_relevant_term_frequency_dict(non_relevant_doc_dict)
+
+        SparseVectorUpdates.update_document_frequency_dict(doc_dict_with_processed_snippets)
 
 
 
