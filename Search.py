@@ -18,16 +18,21 @@ def run(JsonApiKey, EngineID, query):
     #STORE THE REQUIRED INFORMATION AS A LIST OF MAP
     doc_id = 1
     res = []
+    total = 0
     print("Google Search Results: ")
     print("======================")
     for entry in GoogleResults:
-        title, link, website, snippet = "", "", "", "--(empty)--"
-        if 'title' in entry.keys ():
-            title = entry['title']
-        if 'link' in entry.keys():
-            link = entry['link']
-        if 'snippet' in entry.keys():
-            snippet = entry['snippet']
+        if 'fileFormat' in entry.keys():
+            continue
+        else:
+            total+=1
+            title, link, website, snippet = "", "", "", "--(empty)--"
+            if 'title' in entry.keys ():
+                title = entry['title']
+            if 'link' in entry.keys():
+                link = entry['link']
+            if 'snippet' in entry.keys():
+                snippet = entry['snippet']
         entry = {"title": title, "link": link, "snippet": snippet, "relevance": False}
         res.append(entry)
         docdict[doc_id] = entry
@@ -48,7 +53,7 @@ def run(JsonApiKey, EngineID, query):
             doc_entry ['relevance'] = True
         else:
             doc_entry ['relevance'] = False
-    return docdict
+    return docdict,total
 
 def calculate(docdict):
     #calculates precision@10
@@ -60,7 +65,7 @@ def calculate(docdict):
     return count/10
 
 def main():
-    #JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
+    JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
     
     JsonApiKey = sys.argv[1]
     EngineID = sys.argv[2]
@@ -75,7 +80,9 @@ def main():
     time.sleep(1)
     currentPrecision = 0.0
     while currentPrecision < precision:
-        docdict = run(JsonApiKey, EngineID, query)
+        docdict,total = run(JsonApiKey, EngineID, query)
+        if(total !=10):
+            print("No of non-HTML results:",10-total)
         #print("docdict: ",docdict)
         currentPrecision = float(calculate(docdict))
         if currentPrecision == 0.0:
