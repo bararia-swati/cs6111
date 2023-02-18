@@ -10,13 +10,12 @@ from preprocess import Preprocess
 
 docdict = dict()
 
-def run(JsonApiKey, EngineID, query):
+def run(JsonApiKey, EngineID, query,doc_id):
     url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + query
     response = requests.get(url)
     GoogleResults = json.loads(response.text)['items']
 
-    #STORE THE REQUIRED INFORMATION AS A LIST OF MAP
-    doc_id = 1
+    #STORE THE REQUIRED INFORMATION AS A LIST OF MAP 1
     res = []
     print("Google Search Results: ")
     print("======================")
@@ -74,11 +73,11 @@ def main():
     print()
     time.sleep(1)
     currentPrecision = 0.0
-
+    doc_id =1
     SparseVectorUpdates = SparseVectorUpdates()
 
     while currentPrecision < precision:
-        docdict = run(JsonApiKey, EngineID, query)
+        docdict = run(JsonApiKey, EngineID, query,doc_id)
         #print("docdict: ",docdict)
         currentPrecision = float(calculate(docdict))
         if currentPrecision == 0.0:
