@@ -108,6 +108,8 @@ def main():
         SparseVectorUpdates.update_non_relevant_term_frequency_dict(non_relevant_doc_dict)
 
         SparseVectorUpdates.update_document_frequency_dict(doc_dict_with_processed_snippets)
+        SparseVectorUpdates.score(doc_dict_with_processed_snippets,total,1)
+
 
 
 
