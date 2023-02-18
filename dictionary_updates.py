@@ -54,8 +54,7 @@ class SparseVectorUpdates:
                 else:
                     tf = 1+ math.log(self.non_relevant_term_frequency_dict[(word,doc_id)])
                     idf = math.log(10-total/self.document_frequency_dict[word])
-                    self.non_relevent_word_tfidf_scores_dict[word] += tf*idf
-                
+                    self.non_relevent_word_tfidf_scores_dict[word] += tf*idf        
 
 
             
