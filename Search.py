@@ -6,6 +6,7 @@ import sys
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 from preprocess import Preprocess
+from word_order import Word_Order
 
 
 docdict = dict()
@@ -96,7 +97,13 @@ def main():
 
         doc_dict_with_processed_snippets = get_processed_text_docdict(docdict)
         print("doc_dict_with_processed_snippets: ",doc_dict_with_processed_snippets)
-        
+        preprocessor = Preprocess()
+        #print(query)
+        processed_query = preprocessor.preprocess(query)
+        #print(processed_query)
+        word_order = Word_Order()
+        query = word_order.order(processed_query,doc_dict_with_processed_snippets)
+        print("New QUERY:",query)
         #Update Sparese Vector Dictionaries
         relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
         non_relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == False}
