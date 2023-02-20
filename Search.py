@@ -11,7 +11,8 @@ from SparseVectorUpdates import SparseVectorUpdates
 docdict = dict()
 
 def run(JsonApiKey, EngineID, query, doc_id):
-    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + query
+    print("Query in run: ",query)
+    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + str(query) 
     response = requests.get(url)
     GoogleResults = json.loads(response.text)['items']
 
@@ -145,7 +146,7 @@ def main():
 
         print("Selected Query Expansion Terms: ",query_expansion_terms)
 
-        query = query + " " + " ".join(query_expansion_terms)
+        query = query + "+" + "+".join(query_expansion_terms)
 
 
 def get_processed_text_docdict(docdict):
@@ -164,3 +165,7 @@ def get_processed_text_docdict(docdict):
 
 if __name__ == '__main__':
     main()
+
+
+#conda export to yml file
+#conda env export > environment.yml
