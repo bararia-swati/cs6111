@@ -132,7 +132,7 @@ def main():
         #Update Global POS Tag Dictionary
         SparseVectorUpdater.update_global_pos_tag_dict(doc_dict_with_processed_snippets)
 
-        print("Global POS Tag Dictionary: ", SparseVectorUpdater.global_pos_tag_dict)
+        #print("Global POS Tag Dictionary: ", SparseVectorUpdater.global_pos_tag_dict)
         
         #Update Sparse Vector Dictionaries
         relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
@@ -186,7 +186,7 @@ def main():
 
         query_li = ordered_query_li
 
-
+    print("Desired precision reached, done!")
 
 def get_processed_text_docdict(docdict):
     #preprocess the text

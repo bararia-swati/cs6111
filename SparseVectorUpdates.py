@@ -98,8 +98,8 @@ class SparseVectorUpdates:
                 self.non_relevant_word_tfidf_scores_dict[word] += tf_idf_score       
 
         #print dictionary sorted by value
-        print("Relevant Word TFIDF Scores: ", sorted(self.relevant_word_tfidf_scores_dict.items(), key=lambda x: x[1], reverse=True))
-        print("Non Relevant Word TFIDF Scores: ", sorted(self.non_relevant_word_tfidf_scores_dict.items(), key=lambda x: x[1], reverse=True))
+        #print("Relevant Word TFIDF Scores: ", sorted(self.relevant_word_tfidf_scores_dict.items(), key=lambda x: x[1], reverse=True))
+        #print("Non Relevant Word TFIDF Scores: ", sorted(self.non_relevant_word_tfidf_scores_dict.items(), key=lambda x: x[1], reverse=True))
         return 
 
     def update_query_vector_rocchios_algorithm(self, num_relevant_docs, num_non_relevant_docs, alpha=0.5, beta =0.5, gamma = 0.75):
@@ -121,7 +121,7 @@ class SparseVectorUpdates:
                 self.query_vector[term] = 0
 
 
-        print("Query Vector: ", sorted(self.query_vector.items(), key=lambda x: x[1], reverse=True))
+        #print("Query Vector: ", sorted(self.query_vector.items(), key=lambda x: x[1], reverse=True))
         return 
 
     def select_query_expansion_terms(self, num_expansion_terms):
