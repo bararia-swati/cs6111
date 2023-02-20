@@ -6,6 +6,7 @@ import sys
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 from preprocess import Preprocess
+from dictionary_updates import SparseVectorUpdates
 
 
 docdict = dict()
@@ -74,7 +75,7 @@ def main():
     time.sleep(1)
     currentPrecision = 0.0
     doc_id =1
-    SparseVectorUpdates = SparseVectorUpdates()
+    SparseVectorUpdater = SparseVectorUpdates()
 
     while currentPrecision < precision:
         docdict = run(JsonApiKey, EngineID, query,doc_id)
@@ -94,13 +95,13 @@ def main():
         relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
         non_relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == False}
 
-        SparseVectorUpdates.update_all_relevant_doc_ids(relevant_doc_dict)
-        SparseVectorUpdates.update_all_non_relevant_doc_ids(non_relevant_doc_dict)
+        SparseVectorUpdater.update_all_relevant_doc_ids(relevant_doc_dict)
+        SparseVectorUpdater.update_all_non_relevant_doc_ids(non_relevant_doc_dict)
 
-        SparseVectorUpdates.update_relevant_term_frequency_dict(relevant_doc_dict)
-        SparseVectorUpdates.update_non_relevant_term_frequency_dict(non_relevant_doc_dict)
+        SparseVectorUpdater.update_relevant_term_frequency_dict(relevant_doc_dict)
+        SparseVectorUpdater.update_non_relevant_term_frequency_dict(non_relevant_doc_dict)
 
-        SparseVectorUpdates.update_document_frequency_dict(doc_dict_with_processed_snippets)
+        SparseVectorUpdater.update_document_frequency_dict(doc_dict_with_processed_snippets)
 
 
 
