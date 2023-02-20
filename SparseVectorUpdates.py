@@ -20,9 +20,12 @@ class SparseVectorUpdates:
         for term in query_li:
             self.query_vector[term] = -math.inf #to ensure it won't be chosen again
     
-    def update_global_pos_tag_dict(self, pos_tag_dict):
-        for word, pos_tag in pos_tag_dict.items():
-            self.global_pos_tag_dict[word] = pos_tag
+    def update_global_pos_tag_dict(self, doc_dict):
+        for doc_id, doc_entry in doc_dict.items():
+            pos_tag_dict = doc_entry['pos_tag_dict']
+            
+            for word, pos_tag in pos_tag_dict.items():
+                self.global_pos_tag_dict[word] = pos_tag
 
     def update_all_relevant_doc_ids(self, docdict):
         for doc_id, doc_entry in docdict.items():
@@ -95,15 +98,18 @@ class SparseVectorUpdates:
 
                 self.non_relevant_word_tfidf_scores_dict[word] += tf_idf_score       
 
-    def update_query_vector_rocchios_algorithm_and_select_expansion_terms(self, query_vector, alpha, beta, gamma, num_relevant_docs, num_non_relevant_docs, num_expansion_terms):
+    def update_query_vector_rocchios_algorithm(self, num_relevant_docs, num_non_relevant_docs, alpha=0.5, beta =0.5, gamma = 0.5):
         
         all_terms = set(self.relevant_word_tfidf_scores_dict.keys()).union(set(self.non_relevant_word_tfidf_scores_dict.keys()))
         
         for term in all_terms:
             delta = beta*(self.relevant_word_tfidf_scores_dict[term]/num_relevant_docs) - gamma*(self.non_relevant_word_tfidf_scores_dict[term]/num_non_relevant_docs)
 
-            self.query_vector[term] = alpha*query_vector[term] + delta
+            self.query_vector[term] = alpha* self.query_vector[term] + delta
 
+        return 
+
+    def select_query_expansion_terms(self, num_expansion_terms):
         sorted_query_vector = sorted(self.query_vector.items(), key=lambda x: x[1], reverse=True)
         selected_query_expansion_terms = [term for term, score in sorted_query_vector[:num_expansion_terms]]
 
@@ -112,4 +118,5 @@ class SparseVectorUpdates:
             self.query_vector[term] = -math.inf
 
         return selected_query_expansion_terms
+
         

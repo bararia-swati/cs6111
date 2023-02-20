@@ -5,7 +5,7 @@ import os
 import sys
 import numpy as np
 from preprocess import Preprocess
-from dictionary_updates import SparseVectorUpdates
+from SparseVectorUpdates import SparseVectorUpdates
 
 
 docdict = dict()
@@ -81,8 +81,18 @@ def main():
     doc_id =1
     SparseVectorUpdater = SparseVectorUpdates()
 
+    query_preprocesser = Preprocess()
+    preprocessed_query = query_preprocesser.preprocess(query)
+    print("Preprocessed Query: ",preprocessed_query)
+    SparseVectorUpdater.initialize_query_vector(preprocessed_query)
+
+
     while currentPrecision < precision:
+        print("Current DocID index starts from: ",doc_id)
         docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, query,doc_id)
+
+        doc_id += NUM_VALID_WEBPAGES
+
         #print("docdict: ",docdict)
         currentPrecision = float(calculate(docdict))
         if currentPrecision == 0.0:
@@ -97,7 +107,10 @@ def main():
         doc_dict_with_processed_snippets = get_processed_text_docdict(docdict)
         print("doc_dict_with_processed_snippets: ",doc_dict_with_processed_snippets)
         
-        #Update Sparese Vector Dictionaries
+        #Update Global POS Tag Dictionary
+        SparseVectorUpdater.update_global_pos_tag_dict(doc_dict_with_processed_snippets)
+
+        #Update Sparse Vector Dictionaries
         relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
         non_relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == False}
 
@@ -119,6 +132,16 @@ def main():
 
         #TF IDF Scores Computation
         SparseVectorUpdater.update_tfidf_score_dictionaries(NUM_VALID_WEBPAGES)
+
+        #Updating Query Vector with Modified Rocchios Algorithm 
+        ALPHA = 0.5
+        BETA = 0.5
+        GAMMA = 0.5
+        SparseVectorUpdater.update_query_vector_rocchios_algorithm(num_relevant_docs, num_non_relevant_docs, ALPHA, BETA, GAMMA)
+
+        # Select Query Expansion Terms
+        NUM_QUERY_EXPANSION_TERMS = 2
+        query_expansion_terms = SparseVectorUpdater.select_query_expansion_terms(NUM_QUERY_EXPANSION_TERMS)
 
 
 def get_processed_text_docdict(docdict):
