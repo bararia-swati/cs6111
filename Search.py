@@ -132,6 +132,8 @@ def main():
         #Update Global POS Tag Dictionary
         SparseVectorUpdater.update_global_pos_tag_dict(doc_dict_with_processed_snippets)
 
+        print("Global POS Tag Dictionary: ", SparseVectorUpdater.global_pos_tag_dict)
+        
         #Update Sparse Vector Dictionaries
         relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
         non_relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == False}
@@ -154,6 +156,7 @@ def main():
 
         #TF IDF Scores Computation
         SparseVectorUpdater.update_tfidf_score_dictionaries(NUM_VALID_WEBPAGES)
+
 
         #Updating Query Vector with Modified Rocchios Algorithm 
         ALPHA = 0.5
