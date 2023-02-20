@@ -6,18 +6,15 @@ import sys
 import numpy as np
 from preprocess import Preprocess
 from SparseVectorUpdates import SparseVectorUpdates
-import urllib.parse
-
-docdict = dict()
 
 def run(JsonApiKey, EngineID, query, doc_id):
-    encoded_query = urllib.parse.quote(query)
-    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + encoded_query
+    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + query
     response = requests.get(url)
     GoogleResults = json.loads(response.text)['items']
 
     #STORE THE REQUIRED INFORMATION AS A LIST OF MAP 1
     res = []
+    docdict = dict()
     print("Google Search Results: ")
     print("======================")
 
@@ -69,14 +66,8 @@ def main():
     #JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
     JsonApiKey = sys.argv[1]
     EngineID = sys.argv[2]
-    print("JsonApiKey: ",JsonApiKey)
-    print("EngineID: ",EngineID)
-
-    print("ENTER THE SEARCH QUERY: ")
-    query = input()
-    print("ENTER THE Target Precision: ")
-    precision = float(input())
-    print()
+    precision = float(sys.argv[3])
+    query = sys.argv[4]
     time.sleep(1)
     currentPrecision = 0.0
     doc_id =1
@@ -84,27 +75,39 @@ def main():
 
     query_preprocesser = Preprocess()
     preprocessed_query, query_pos_tag_dict = query_preprocesser.preprocess(query)
-    print("Preprocessed Query: ",preprocessed_query)
+    #print("Preprocessed Query: ",preprocessed_query)
     SparseVectorUpdater.initialize_query_vector(preprocessed_query)
 
 
     while currentPrecision < precision:
-        print("Current DocID index starts from: ",doc_id)
-        print("New Query: ",query)
+    #    print("Current DocID index starts from: ",doc_id)
+    #    print("New Query: ",query)
+        print("Parameters:")
+        print("Client key  = ",JsonApiKey)
+        print("Engine key  = ",EngineID)
+        print("Query       = ",query)
+        print("Precision   = ",precision)
         docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, query,doc_id)
 
         doc_id += NUM_VALID_WEBPAGES
-
         #print("docdict: ",docdict)
         currentPrecision = float(calculate(docdict))
+        print("======================")
+        print("FEEDBACK SUMMARY")
+        print("Query ",query)
+        print("Precision ",currentPrecision)
+        if(currentPrecision<precision):
+            print("Still below the desired precision of ",precision)
         if currentPrecision == 0.0:
-            print("NO RELEVANT DOCUMENT FOUND TO EXPAND THE QUERY WITH")
+            print("Below desired precision, but can no longer augment the query")
             exit()
-        print("Current Precision: ",currentPrecision)
+        print("Indexing results ....")
+        print("Indexing results ....")
+        #print("Current Precision: ",currentPrecision)
 
         #new_doc_summaries= [doc_entry['snippet'] for doc_entry in docdict.values()]
 
-        print("There are ",NUM_VALID_WEBPAGES," valid webpages" + "\n")
+        #print("There are ",NUM_VALID_WEBPAGES," valid webpages" + "\n")
 
         doc_dict_with_processed_snippets = get_processed_text_docdict(docdict)
         
@@ -144,7 +147,7 @@ def main():
         NUM_QUERY_EXPANSION_TERMS = 2
         query_expansion_terms = SparseVectorUpdater.select_query_expansion_terms(NUM_QUERY_EXPANSION_TERMS)
 
-        print("Selected Query Expansion Terms: ",query_expansion_terms)
+        print("Augmenting by ",query_expansion_terms)
 
         query = query + " " + " ".join(query_expansion_terms)
 
