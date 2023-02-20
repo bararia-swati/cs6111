@@ -31,7 +31,9 @@ def run(JsonApiKey, EngineID, query, doc_id):
             link = entry['link']
         if 'snippet' in entry.keys():
             snippet = entry['snippet']
-        entry = {"title": title, "link": link, "snippet": snippet, "relevance": False}
+        
+        title_and_snippet_text = title + " " + snippet
+        entry = {"title": title, "link": link, "snippet": title_and_snippet_text, "snippet_only": snippet, "relevance": False}
         res.append(entry)
         docdict[doc_id] = entry
         doc_id += 1
@@ -44,7 +46,7 @@ def run(JsonApiKey, EngineID, query, doc_id):
         
         print("URL: " + doc_entry['link'])
         print("Title: " + doc_entry['title'])
-        print("Summary: " + doc_entry['snippet'])
+        print("Summary: " + doc_entry['snippet_only'])
         print("]")
         print("Relevant (Y/N)? ")
         check = input()
@@ -55,14 +57,17 @@ def run(JsonApiKey, EngineID, query, doc_id):
             doc_entry ['relevance'] = False
     return docdict, NUM_VALID_WEBPAGES
 
-def calculate(docdict):
+def calculate_precision(docdict, NUM_VALID_WEBPAGES):
     #calculates precision@10
-    #returns precision
+    #returns precision    
     count = 0.0
     for doc_id, doc_entry in docdict.items():
         if doc_entry['relevance'] == True:
             count += 1
-    return count/10
+
+    #print("NUM_VALID_WEBPAGES: ", NUM_VALID_WEBPAGES)
+
+    return count/NUM_VALID_WEBPAGES
 
 def main():
     #JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
@@ -77,7 +82,6 @@ def main():
 
     query_preprocesser = Preprocess()
     preprocessed_initial_query, query_pos_tag_dict = query_preprocesser.preprocess(query)
-    #print("Preprocessed Initial Query: ",preprocessed_initial_query)
     SparseVectorUpdater.initialize_query_vector(preprocessed_initial_query)
 
     #Map from preprocessed query to initial query original
@@ -89,7 +93,6 @@ def main():
     query_li = query.split()
 
     while currentPrecision < precision:
-        #print("Current DocID index starts from: ",doc_id)
         print("Parameters:")
         print("Client key  = ",JsonApiKey)
         print("Engine key  = ",EngineID)
@@ -109,7 +112,7 @@ def main():
 
         doc_id += NUM_VALID_WEBPAGES
         #print("docdict: ",docdict)
-        currentPrecision = float(calculate(docdict))
+        currentPrecision = float(calculate_precision(docdict, NUM_VALID_WEBPAGES))
         print("======================")
         print("FEEDBACK SUMMARY")
         print("Query ",query)
@@ -121,7 +124,6 @@ def main():
             exit()
         print("Indexing results ....")
         print("Indexing results ....")
-        #print("Current Precision: ",currentPrecision)
 
         #print("There are ",NUM_VALID_WEBPAGES," valid webpages" + "\n")
 
@@ -172,7 +174,6 @@ def main():
         #Now, query ordering
         Query_Orderer = Laddered_Query_Order(query_li, original_initial_query_to_preprocessed_query_map)
         ordered_query_li = Query_Orderer.execute(docdict)
-        #print("Ordered Query Li: ",ordered_query_li)
 
         #if length of ordered_query_li < query_li (i.e. if best permutation through our algorith has a lower length match), simply default to adding the previous terms to the beginning of the ordered_query_li
         if len(ordered_query_li) < len(query_li):
@@ -183,9 +184,6 @@ def main():
         query_li = ordered_query_li
 
 
-    #pring global pos tag dict
-    # print("Global POS Tag Dictionary: ",SparseVectorUpdater.global_pos_tag_dict)
-    # print('Target Precision Reached')
 
 def get_processed_text_docdict(docdict):
     #preprocess the text

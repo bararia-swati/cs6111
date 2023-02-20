@@ -3,7 +3,6 @@ import math
 
 class Laddered_Query_Order:
     def __init__(self, query_li, original_initial_query_to_preprocessed_query_map):
-        print("Inside Laddered Query_Order")
 
         self.query_li = query_li
         cleaned_query_li = []
@@ -15,8 +14,7 @@ class Laddered_Query_Order:
 
         self.cleaned_query_li = cleaned_query_li
 
-        print("Inside Query_Order: cleaned_query_li: ", cleaned_query_li)
-
+        #print("Inside Query_Order: cleaned_query_li: ", cleaned_query_li)
         self.cleaned_query = " ".join(cleaned_query_li)
 
         self.query_term_to_digit_map= self.construct_query_to_digit_map(self.cleaned_query_li)
@@ -56,10 +54,9 @@ class Laddered_Query_Order:
             if(doc_entry['relevance']==True):
                 processed_snippet = doc_entry['processed_snippet']
                 processed_snippet = processed_snippet.split()
-                print(processed_snippet)
+
                 for word in processed_snippet:
                     if(word in query_dict.keys()):
-                        print(word)
                         corpus+= str(query_dict[word])
         return corpus
 
@@ -114,17 +111,17 @@ class Laddered_Query_Order:
 
         
     def execute(self,docdict):
-        print("1: ",self.query_term_to_digit_map)
+        #print("1: ",self.query_term_to_digit_map)
         bin_corpus = self.combine(docdict,self.query_term_to_digit_map)
-        print("2: ",bin_corpus)
+        #print("2: ",bin_corpus)
         clean_bin_corpus = self.remove_consecutive(bin_corpus)
-        print("3: ",clean_bin_corpus)
+        #print("3: ",clean_bin_corpus)
         k = len(self.query_term_to_digit_map)
         permutation_to_frequency,max_frequency,new_bin_query = self.cal_frequency(k,clean_bin_corpus)
-        print("4: ",permutation_to_frequency,new_bin_query)
+        #print("4: ",permutation_to_frequency,new_bin_query)
         
         ordered_query_li = self.get_query_ordering(permutation_to_frequency, k)
-        print("5: ",ordered_query_li)
+        #print("5: ",ordered_query_li)
 
         return ordered_query_li
 
