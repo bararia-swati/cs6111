@@ -68,15 +68,15 @@ class SparseVectorUpdates:
                 tf_idf_score = tf*idf
 
                 if self.global_pos_tag_dict[word] == 'NOUN':
-                    tf_idf_score *= 1.5
+                    tf_idf_score *= 2.0
                 elif self.global_pos_tag_dict[word] == 'PROPN':
-                    tf_idf_score *= 1.5
+                    tf_idf_score *= 2.0
                 elif self.global_pos_tag_dict[word] == 'ADJ':
                     tf_idf_score *= 1.0
                 elif self.global_pos_tag_dict[word] == 'VERB':
                     tf_idf_score *= 0.5
                 elif self.global_pos_tag_dict[word] == 'DET':
-                    tf_idf_score *= 0.5
+                    tf_idf_score *= 0.25
                 
                 
                 self.relevant_word_tfidf_scores_dict[word] += tf_idf_score
@@ -87,30 +87,24 @@ class SparseVectorUpdates:
 
                 tf_idf_score = tf*idf
 
-                if self.global_pos_tag_dict[word] == 'NOUN':
-                    tf_idf_score *= 1.5
-                elif self.global_pos_tag_dict[word] == 'PROPN':
-                    tf_idf_score *= 1.5
-                elif self.global_pos_tag_dict[word] == 'ADJ':
-                    tf_idf_score *= 1.0
-                elif self.global_pos_tag_dict[word] == 'VERB':
-                    tf_idf_score *= 0.5
-                elif self.global_pos_tag_dict[word] == 'DET':
-                    tf_idf_score *= 0.5
-
                 self.non_relevant_word_tfidf_scores_dict[word] += tf_idf_score       
 
         print("Relevant Word TFIDF Scores: ", self.relevant_word_tfidf_scores_dict)
         print("Non Relevant Word TFIDF Scores: ", self.non_relevant_word_tfidf_scores_dict)
         return 
+
     def update_query_vector_rocchios_algorithm(self, num_relevant_docs, num_non_relevant_docs, alpha=0.5, beta =0.5, gamma = 0.5):
         
         all_terms = set(self.relevant_word_tfidf_scores_dict.keys()).union(set(self.non_relevant_word_tfidf_scores_dict.keys()))
-        
+        if num_non_relevant_docs == 0 or num_relevant_docs == 0:
+            return
+
         for term in all_terms:
             delta = beta*(self.relevant_word_tfidf_scores_dict[term]/num_relevant_docs) - gamma*(self.non_relevant_word_tfidf_scores_dict[term]/num_non_relevant_docs)
-
             self.query_vector[term] = alpha* self.query_vector[term] + delta
+
+            if self.query_vector[term] < 0:
+                self.query_vector[term] = 0
 
         return 
 

@@ -53,6 +53,10 @@ class Preprocess:
     def stem(self, text):
         return [self.stemmer.stem(word) for word in text]
 
+    def keep_letters_only(self, text):
+        res = ''.join([i for i in text if i.isalpha() or i == ' '])
+        return res
+
     def remove_short_words(self, text):
         return [word for word in text if len(word) > 1]
     
@@ -72,11 +76,13 @@ class Preprocess:
         pos_tags_dict = self.pos_tagging(text)
 
         text = self.remove_punctuation(text)
+        text = self.keep_letters_only(text)
 
         text = self.remove_duplicate_spaces(text)
         text = text.split()
         
         text = self.remove_stopwords(text)
+        
         text = self.remove_short_words(text)
         text = self.lemmatize(text)
 
@@ -88,11 +94,10 @@ class Preprocess:
 
 
 
-"""
-Tests
 
+"""
 TextProcessor = Preprocess()
-original_text = "This is a test sentence. It has punctuation, numbers 123, and short words like a, an, and the."
+original_text = "This is a test sentence with covid-19. It has punctuation, numbers 123, and short words like a, an, and the."
 print("Original Text: ", original_text)
 processed_text = TextProcessor.preprocess(original_text)
 print("Processed Text: ", processed_text)

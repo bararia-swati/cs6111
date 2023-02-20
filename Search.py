@@ -6,15 +6,17 @@ import sys
 import numpy as np
 from preprocess import Preprocess
 from SparseVectorUpdates import SparseVectorUpdates
+import urllib
 
-
-docdict = dict()
 
 def run(JsonApiKey, EngineID, query, doc_id):
-    print("Query in run: ",query)
-    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + str(query) 
-    response = requests.get(url)
+    print("Query in RUN (): ",query)
+    docdict = dict()
+    encoded_query = urllib.parse.quote(query)
+    api_url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + str(encoded_query)
+    response = requests.get(api_url)
     GoogleResults = json.loads(response.text)['items']
+    #print(GoogleResults)
 
     #STORE THE REQUIRED INFORMATION AS A LIST OF MAP 1
     res = []
@@ -32,7 +34,7 @@ def run(JsonApiKey, EngineID, query, doc_id):
             link = entry['link']
         if 'snippet' in entry.keys():
             snippet = entry['snippet']
-        entry = {"title": title, "link": link, "snippet": snippet, "relevance": False}
+        entry = {"title": title, "link": link, "snippet": title+snippet, "snippet_only": snippet , "relevance": False}
         res.append(entry)
         docdict[doc_id] = entry
         doc_id += 1
@@ -45,7 +47,7 @@ def run(JsonApiKey, EngineID, query, doc_id):
         
         print("URL: " + doc_entry['link'])
         print("Title: " + doc_entry['title'])
-        print("Summary: " + doc_entry['snippet'])
+        print("Summary: " + doc_entry['snippet_only'])
         print("]")
         print("Relevant (Y/N)? ")
         check = input()
@@ -146,8 +148,11 @@ def main():
 
         print("Selected Query Expansion Terms: ",query_expansion_terms)
 
-        query = query + "+" + "+".join(query_expansion_terms)
+        query = query + " " + " ".join(query_expansion_terms)
 
+    #pring global pos tag dict
+    print("Global POS Tag Dictionary: ",SparseVectorUpdater.global_pos_tag_dict)
+    print('Target Precision Reached')
 
 def get_processed_text_docdict(docdict):
     #preprocess the text
@@ -158,6 +163,7 @@ def get_processed_text_docdict(docdict):
     
         processed_text, pos_tag_dict = preprocessor.preprocess(doc_text)
         docdict[doc_id]['processed_snippet'] = processed_text
+        print("Processed Snippet: ",processed_text)
         docdict[doc_id]['pos_tag_dict'] = pos_tag_dict
     
     return docdict
@@ -166,6 +172,3 @@ def get_processed_text_docdict(docdict):
 if __name__ == '__main__':
     main()
 
-
-#conda export to yml file
-#conda env export > environment.yml
