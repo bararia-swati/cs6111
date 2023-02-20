@@ -6,12 +6,13 @@ import sys
 import numpy as np
 from preprocess import Preprocess
 from SparseVectorUpdates import SparseVectorUpdates
-
+import urllib.parse
 
 docdict = dict()
 
 def run(JsonApiKey, EngineID, query, doc_id):
-    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + query
+    encoded_query = urllib.parse.quote(query)
+    url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + encoded_query
     response = requests.get(url)
     GoogleResults = json.loads(response.text)['items']
 
