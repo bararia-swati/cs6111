@@ -2,7 +2,7 @@ from collections import defaultdict, Counter
 import math
 
 class SparseVectorUpdates:
-    def __init__(self, dictionary):
+    def __init__(self):
         self.all_relevant_doc_ids = set()
         self.all_non_relevant_doc_ids = set()
         self.relevant_term_frequency_dict = defaultdict(int)
@@ -16,6 +16,8 @@ class SparseVectorUpdates:
         self.query_vector = defaultdict(float)
 
     def initialize_query_vector(self, query):
+        print("Initializing Query Vector")
+        print("Query: ",query)
         query_li = query.split()
         for term in query_li:
             self.query_vector[term] = -math.inf #to ensure it won't be chosen again
@@ -23,7 +25,7 @@ class SparseVectorUpdates:
     def update_global_pos_tag_dict(self, doc_dict):
         for doc_id, doc_entry in doc_dict.items():
             pos_tag_dict = doc_entry['pos_tag_dict']
-            
+
             for word, pos_tag in pos_tag_dict.items():
                 self.global_pos_tag_dict[word] = pos_tag
 
@@ -37,19 +39,19 @@ class SparseVectorUpdates:
     
     def update_relevant_term_frequency_dict(self, docdict):
         for doc_id, doc_entry in docdict.items():
-            processed_snippet = doc_entry['processed_snippet']
+            processed_snippet = doc_entry['processed_snippet'].split()
             for word in processed_snippet:
                 self.relevant_term_frequency_dict[(word, doc_id)] += 1
     
     def update_non_relevant_term_frequency_dict(self, docdict):
         for doc_id, doc_entry in docdict.items():
-            processed_snippet = doc_entry['processed_snippet']
+            processed_snippet = doc_entry['processed_snippet'].split()
             for word in processed_snippet:
                 self.non_relevant_term_frequency_dict[(word, doc_id)] += 1
     
     def update_document_frequency_dict(self, docdict):
         for doc_id, doc_entry in docdict.items():
-            processed_snippet = doc_entry['processed_snippet']
+            processed_snippet = doc_entry['processed_snippet'].split()
             word_freq_in_snippet = Counter(processed_snippet)
             for word in word_freq_in_snippet.keys():
                 self.document_frequency_dict[word] += 1
@@ -85,7 +87,7 @@ class SparseVectorUpdates:
 
                 tf_idf_score = tf*idf
 
-                if self.global_pos_tag_dict[word] == 'NOUN'
+                if self.global_pos_tag_dict[word] == 'NOUN':
                     tf_idf_score *= 1.5
                 elif self.global_pos_tag_dict[word] == 'PROPN':
                     tf_idf_score *= 1.5
@@ -98,6 +100,9 @@ class SparseVectorUpdates:
 
                 self.non_relevant_word_tfidf_scores_dict[word] += tf_idf_score       
 
+        print("Relevant Word TFIDF Scores: ", self.relevant_word_tfidf_scores_dict)
+        print("Non Relevant Word TFIDF Scores: ", self.non_relevant_word_tfidf_scores_dict)
+        return 
     def update_query_vector_rocchios_algorithm(self, num_relevant_docs, num_non_relevant_docs, alpha=0.5, beta =0.5, gamma = 0.5):
         
         all_terms = set(self.relevant_word_tfidf_scores_dict.keys()).union(set(self.non_relevant_word_tfidf_scores_dict.keys()))

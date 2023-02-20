@@ -54,7 +54,7 @@ class Preprocess:
         return [self.stemmer.stem(word) for word in text]
 
     def remove_short_words(self, text):
-        return [word for word in text if len(word) > 2]
+        return [word for word in text if len(word) > 1]
     
     def pos_tagging(self, text):
         #Spacy POS Tagging
@@ -70,7 +70,6 @@ class Preprocess:
         text = self.remove_special_characters(text)
         text = self.lowercase(text)
         pos_tags_dict = self.pos_tagging(text)
-        print("pos_tags_dict: ",pos_tags_dict)
 
         text = self.remove_punctuation(text)
 
@@ -78,6 +77,7 @@ class Preprocess:
         text = text.split()
         
         text = self.remove_stopwords(text)
+        text = self.remove_short_words(text)
         text = self.lemmatize(text)
 
         processed_text= ' '.join(text)
@@ -85,17 +85,18 @@ class Preprocess:
         return processed_text, pos_tags_dict
 
 
-TextProcessor = Preprocess()
 
+
+
+"""
+Tests
+
+TextProcessor = Preprocess()
 original_text = "This is a test sentence. It has punctuation, numbers 123, and short words like a, an, and the."
 print("Original Text: ", original_text)
 processed_text = TextProcessor.preprocess(original_text)
 print("Processed Text: ", processed_text)
-
-#Write a Class called Search that has the following methods:
-#run
-#calculate
-#
+"""
 
 
 

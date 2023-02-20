@@ -10,7 +10,7 @@ from SparseVectorUpdates import SparseVectorUpdates
 
 docdict = dict()
 
-def run(JsonApiKey, EngineID, query,doc_id):
+def run(JsonApiKey, EngineID, query, doc_id):
     url = "https://www.googleapis.com/customsearch/v1?key=" + JsonApiKey + "&cx=" + EngineID + "&q=" + query
     response = requests.get(url)
     GoogleResults = json.loads(response.text)['items']
@@ -82,13 +82,14 @@ def main():
     SparseVectorUpdater = SparseVectorUpdates()
 
     query_preprocesser = Preprocess()
-    preprocessed_query = query_preprocesser.preprocess(query)
+    preprocessed_query, query_pos_tag_dict = query_preprocesser.preprocess(query)
     print("Preprocessed Query: ",preprocessed_query)
     SparseVectorUpdater.initialize_query_vector(preprocessed_query)
 
 
     while currentPrecision < precision:
         print("Current DocID index starts from: ",doc_id)
+        print("New Query: ",query)
         docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, query,doc_id)
 
         doc_id += NUM_VALID_WEBPAGES
@@ -105,7 +106,6 @@ def main():
         print("There are ",NUM_VALID_WEBPAGES," valid webpages" + "\n")
 
         doc_dict_with_processed_snippets = get_processed_text_docdict(docdict)
-        print("doc_dict_with_processed_snippets: ",doc_dict_with_processed_snippets)
         
         #Update Global POS Tag Dictionary
         SparseVectorUpdater.update_global_pos_tag_dict(doc_dict_with_processed_snippets)
@@ -142,6 +142,10 @@ def main():
         # Select Query Expansion Terms
         NUM_QUERY_EXPANSION_TERMS = 2
         query_expansion_terms = SparseVectorUpdater.select_query_expansion_terms(NUM_QUERY_EXPANSION_TERMS)
+
+        print("Selected Query Expansion Terms: ",query_expansion_terms)
+
+        query = query + " " + " ".join(query_expansion_terms)
 
 
 def get_processed_text_docdict(docdict):
