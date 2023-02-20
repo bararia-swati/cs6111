@@ -3,7 +3,6 @@ import json
 import time
 import os
 import sys
-from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 from preprocess import Preprocess
 from dictionary_updates import SparseVectorUpdates
@@ -20,7 +19,11 @@ def run(JsonApiKey, EngineID, query,doc_id):
     res = []
     print("Google Search Results: ")
     print("======================")
+
+    NUM_VALID_WEBPAGES = 0
     for entry in GoogleResults:
+        if 'fileFormat' in entry.keys():
+            continue
         title, link, website, snippet = "", "", "", "--(empty)--"
         if 'title' in entry.keys ():
             title = entry['title']
@@ -32,6 +35,8 @@ def run(JsonApiKey, EngineID, query,doc_id):
         res.append(entry)
         docdict[doc_id] = entry
         doc_id += 1
+
+        NUM_VALID_WEBPAGES += 1
 
     for doc_id, doc_entry in docdict.items():
         print("RESULT " + str(doc_id))
@@ -48,7 +53,7 @@ def run(JsonApiKey, EngineID, query,doc_id):
             doc_entry ['relevance'] = True
         else:
             doc_entry ['relevance'] = False
-    return docdict
+    return docdict, NUM_VALID_WEBPAGES
 
 def calculate(docdict):
     #calculates precision@10
@@ -61,7 +66,6 @@ def calculate(docdict):
 
 def main():
     #JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
-    
     JsonApiKey = sys.argv[1]
     EngineID = sys.argv[2]
     print("JsonApiKey: ",JsonApiKey)
@@ -78,7 +82,7 @@ def main():
     SparseVectorUpdater = SparseVectorUpdates()
 
     while currentPrecision < precision:
-        docdict = run(JsonApiKey, EngineID, query,doc_id)
+        docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, query,doc_id)
         #print("docdict: ",docdict)
         currentPrecision = float(calculate(docdict))
         if currentPrecision == 0.0:
@@ -88,6 +92,8 @@ def main():
 
         #new_doc_summaries= [doc_entry['snippet'] for doc_entry in docdict.values()]
 
+        print("There are ",NUM_VALID_WEBPAGES," valid webpages" + "\n")
+
         doc_dict_with_processed_snippets = get_processed_text_docdict(docdict)
         print("doc_dict_with_processed_snippets: ",doc_dict_with_processed_snippets)
         
@@ -95,14 +101,24 @@ def main():
         relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == True}
         non_relevant_doc_dict= {doc_id: doc_entry for doc_id, doc_entry in doc_dict_with_processed_snippets.items() if doc_entry['relevance'] == False}
 
+        relevant_doc_ids = list(relevant_doc_dict.keys())
+        non_relevant_doc_ids = list(non_relevant_doc_dict.keys())
+        num_relevant_docs = len(relevant_doc_ids)
+        num_non_relevant_docs = len(non_relevant_doc_ids)
+
+        #Just updating list of all relevant and non-relevant doc_ids seen so far
         SparseVectorUpdater.update_all_relevant_doc_ids(relevant_doc_dict)
         SparseVectorUpdater.update_all_non_relevant_doc_ids(non_relevant_doc_dict)
 
+        #Updating the term frequency dictionaries
         SparseVectorUpdater.update_relevant_term_frequency_dict(relevant_doc_dict)
         SparseVectorUpdater.update_non_relevant_term_frequency_dict(non_relevant_doc_dict)
 
+        #Updating the document frequency dictionaries
         SparseVectorUpdater.update_document_frequency_dict(doc_dict_with_processed_snippets)
 
+        #TF IDF Scores Computation
+        SparseVectorUpdater.update_tfidf_score_dictionaries(NUM_VALID_WEBPAGES)
 
 
 def get_processed_text_docdict(docdict):
