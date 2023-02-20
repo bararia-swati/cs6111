@@ -16,8 +16,8 @@ class SparseVectorUpdates:
         self.query_vector = defaultdict(float)
 
     def initialize_query_vector(self, query):
-        print("Initializing Query Vector")
-        print("Query: ",query)
+        #print("Initializing Query Vector")
+        #print("Query: ",query)
         query_li = query.split()
         for term in query_li:
             self.query_vector[term] = -math.inf #to ensure it won't be chosen again
@@ -89,8 +89,8 @@ class SparseVectorUpdates:
 
                 self.non_relevant_word_tfidf_scores_dict[word] += tf_idf_score       
 
-        print("Relevant Word TFIDF Scores: ", self.relevant_word_tfidf_scores_dict)
-        print("Non Relevant Word TFIDF Scores: ", self.non_relevant_word_tfidf_scores_dict)
+        #print("Relevant Word TFIDF Scores: ", self.relevant_word_tfidf_scores_dict)
+        #print("Non Relevant Word TFIDF Scores: ", self.non_relevant_word_tfidf_scores_dict)
         return 
 
     def update_query_vector_rocchios_algorithm(self, num_relevant_docs, num_non_relevant_docs, alpha=0.5, beta =0.5, gamma = 0.5):
