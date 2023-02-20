@@ -8,7 +8,7 @@
 
 
 import nltk
-#import spacy
+import spacy
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -24,7 +24,7 @@ class Preprocess:
         self.stopwords = stopwords.words('english')
         self.lemmatizer = WordNetLemmatizer()
         self.stemmer = PorterStemmer()
-        #self.spacy_nlp= spacy.load('en_core_web_sm')
+        self.spacy_nlp= spacy.load('en_core_web_sm')
         self.punctuation = string.punctuation
         self.numbers = string.digits
 
@@ -60,20 +60,20 @@ class Preprocess:
     def remove_short_words(self, text):
         return [word for word in text if len(word) > 1]
     
-    # def pos_tagging(self, text):
-    #     #Spacy POS Tagging
+    def pos_tagging(self, text):
+        #Spacy POS Tagging
         
-    #     doc = self.spacy_nlp(text)
-    #     token_to_pos = {}
-    #     for token in doc:
-    #         token_to_pos[token.text] = token.pos_
+        doc = self.spacy_nlp(text)
+        token_to_pos = {}
+        for token in doc:
+            token_to_pos[token.text] = token.pos_
 
-    #     return token_to_pos
+        return token_to_pos
 
     def preprocess(self, text):
         text = self.remove_special_characters(text)
         text = self.lowercase(text)
-        pos_tags_dict = {} #self.pos_tagging(text)
+        pos_tags_dict = self.pos_tagging(text)
 
         text = self.remove_punctuation(text)
         text = self.keep_letters_only(text)
