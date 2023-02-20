@@ -7,6 +7,8 @@ import numpy as np
 from preprocess import Preprocess
 from SparseVectorUpdates import SparseVectorUpdates
 import urllib
+from query_ordering import Query_Order
+from laddered_query_ordering import Laddered_Query_Order
 
 
 def run(JsonApiKey, EngineID, query, doc_id):
@@ -85,15 +87,32 @@ def main():
     SparseVectorUpdater = SparseVectorUpdates()
 
     query_preprocesser = Preprocess()
-    preprocessed_query, query_pos_tag_dict = query_preprocesser.preprocess(query)
-    print("Preprocessed Query: ",preprocessed_query)
-    SparseVectorUpdater.initialize_query_vector(preprocessed_query)
+    preprocessed_initial_query, query_pos_tag_dict = query_preprocesser.preprocess(query)
+    print("Preprocessed Initial Query: ",preprocessed_initial_query)
+    SparseVectorUpdater.initialize_query_vector(preprocessed_initial_query)
 
+    #Map from preprocessed query to initial query original
+    preprocessed_query_to_original_query_map = dict()
+    preprocessed_query_to_original_query_map[preprocessed_initial_query] = query
+    original_initial_query_to_preprocessed_query_map = dict()
+    original_initial_query_to_preprocessed_query_map[query] = preprocessed_initial_query
+
+    query_li = query.split()
 
     while currentPrecision < precision:
         print("Current DocID index starts from: ",doc_id)
-        print("New Query: ",query)
-        docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, query,doc_id)
+        
+        original_format_query_li = list()
+        for query_term in query_li:
+            if query_term in preprocessed_query_to_original_query_map:
+                original_format_query_li.append(preprocessed_query_to_original_query_map[query_term])
+            else:
+                original_format_query_li.append(query_term)
+
+        original_format_query = " ".join(original_format_query_li)
+        print(" New Query : ",original_format_query)
+
+        docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, original_format_query,doc_id)
 
         doc_id += NUM_VALID_WEBPAGES
 
@@ -103,8 +122,6 @@ def main():
             print("NO RELEVANT DOCUMENT FOUND TO EXPAND THE QUERY WITH")
             exit()
         print("Current Precision: ",currentPrecision)
-
-        #new_doc_summaries= [doc_entry['snippet'] for doc_entry in docdict.values()]
 
         print("There are ",NUM_VALID_WEBPAGES," valid webpages" + "\n")
 
@@ -148,7 +165,23 @@ def main():
 
         print("Selected Query Expansion Terms: ",query_expansion_terms)
 
+        query_li.extend(query_expansion_terms)
+
         query = query + " " + " ".join(query_expansion_terms)
+
+        #Now, query ordering
+        Query_Orderer = Laddered_Query_Order(query_li, original_initial_query_to_preprocessed_query_map)
+        ordered_query_li = Query_Orderer.execute(docdict)
+        print("Ordered Query Li: ",ordered_query_li)
+
+        #if length of ordered_query_li < query_li (i.e. if best permutation through our algorith has a lower length match), simply default to adding the previous terms to the beginning of the ordered_query_li
+        if len(ordered_query_li) < len(query_li):
+            for query_term in query_li:
+                if query_term not in ordered_query_li:
+                    ordered_query_li.insert(0,query_term)
+
+        query_li = ordered_query_li
+
 
     #pring global pos tag dict
     print("Global POS Tag Dictionary: ",SparseVectorUpdater.global_pos_tag_dict)
