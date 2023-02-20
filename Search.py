@@ -7,7 +7,6 @@ import numpy as np
 from preprocess import Preprocess
 from SparseVectorUpdates import SparseVectorUpdates
 import urllib
-from query_ordering import Query_Order
 from laddered_query_ordering import Laddered_Query_Order
 
 
