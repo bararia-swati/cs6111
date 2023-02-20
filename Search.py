@@ -59,14 +59,14 @@ def run(JsonApiKey, EngineID, query, doc_id):
             doc_entry ['relevance'] = False
     return docdict, NUM_VALID_WEBPAGES
 
-def calculate(docdict):
+def calculate(docdict, NUM_VALID_WEBPAGES):
     #calculates precision@10
     #returns precision
     count = 0.0
     for doc_id, doc_entry in docdict.items():
         if doc_entry['relevance'] == True:
             count += 1
-    return count/10
+    return count/NUM_VALID_WEBPAGES
 
 def main():
     #JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
@@ -116,7 +116,7 @@ def main():
         doc_id += NUM_VALID_WEBPAGES
 
         #print("docdict: ",docdict)
-        currentPrecision = float(calculate(docdict))
+        currentPrecision = float(calculate(docdict, NUM_VALID_WEBPAGES))
         if currentPrecision == 0.0:
             print("NO RELEVANT DOCUMENT FOUND TO EXPAND THE QUERY WITH")
             exit()
