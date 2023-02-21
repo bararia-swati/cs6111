@@ -14,14 +14,11 @@ class Laddered_Query_Order:
 
         self.cleaned_query_li = cleaned_query_li
 
-        #print("Inside Query_Order: cleaned_query_li: ", cleaned_query_li)
         self.cleaned_query = " ".join(cleaned_query_li)
-
         self.query_term_to_digit_map= self.construct_query_to_digit_map(self.cleaned_query_li)
-
         self.reverse_digit_to_term_map = self.get_reverse_digit_to_term_map()
         
-
+# Map the integer indexs to indiviual query terms
     def get_reverse_digit_to_term_map(self):
         reverse_digit_to_term_map = dict()
         for word in self.cleaned_query_li:
@@ -30,6 +27,7 @@ class Laddered_Query_Order:
         
         return reverse_digit_to_term_map
 
+## Map the query terms to consecutive integers
     def construct_query_to_digit_map(self, query_li):
         query_to_digit_mapping = dict()
         i=1
@@ -48,18 +46,20 @@ class Laddered_Query_Order:
 
         return ordered_query
 
+#Generate the integer corpus for relevent documents
     def combine(self, docdict,query_dict):
         corpus = ""
         for doc_id,doc_entry in docdict.items():
             if(doc_entry['relevance']==True):
                 processed_snippet = doc_entry['processed_snippet']
                 processed_snippet = processed_snippet.split()
-
+#only storing the relative order of query terms in corpus.
                 for word in processed_snippet:
                     if(word in query_dict.keys()):
                         corpus+= str(query_dict[word])
         return corpus
 
+# removing consecutvie integers from bin_corpus as we just care about the relative ordering of the terms
     def remove_consecutive(self, bin_corpus):
         clean_bin_corpus = ""
         prev = "0"
@@ -69,12 +69,10 @@ class Laddered_Query_Order:
             prev=i
         return clean_bin_corpus
 
+#calculating the frequency of all permutations of length >=2 in which query terms are present in corpus
     def cal_frequency(self,k,clean_bin_corpus):
         permutation_to_frequency = defaultdict(dict)
-        max_frequency = 0
-        new_bin_query = ""
-        for n in range(2,k+1):
-            
+        for n in range(2,k+1): 
             for i in range(len(clean_bin_corpus)-n+1):
                 check_unique = set()
                 for j in range(n):
@@ -84,11 +82,9 @@ class Laddered_Query_Order:
                         permutation_to_frequency[n][clean_bin_corpus[i:i+n]]+=1
                     else:
                         permutation_to_frequency[n][clean_bin_corpus[i:i+n]]=1
-                    if(max_frequency<permutation_to_frequency[n][clean_bin_corpus[i:i+n]]):
-                        max_frequency = max(max_frequency,permutation_to_frequency[n][clean_bin_corpus[i:i+n]])
-                        new_bin_query = clean_bin_corpus[i:i+n]
-        return permutation_to_frequency,max_frequency,new_bin_query
+        return permutation_to_frequency
 
+#returns the permutation with max frequeny using the map created above
     def get_query_ordering(self,permutation_to_frequency, k):
         #n in range k to 2
         max_frequency = -math.inf
@@ -114,10 +110,9 @@ class Laddered_Query_Order:
         bin_corpus = self.combine(docdict,self.query_term_to_digit_map)
         clean_bin_corpus = self.remove_consecutive(bin_corpus)
         k = len(self.query_term_to_digit_map)
-        permutation_to_frequency,max_frequency,new_bin_query = self.cal_frequency(k,clean_bin_corpus)
-        
-        ordered_query_li = self.get_query_ordering(permutation_to_frequency, k)
+        permutation_to_frequency = self.cal_frequency(k,clean_bin_corpus)
 
+        ordered_query_li = self.get_query_ordering(permutation_to_frequency, k)
         return ordered_query_li
 
         
