@@ -6,9 +6,7 @@
 JsonApiKey, EngineID = "AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY", "e6d037c2c6089967e"
 
 
-python Search.py AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY e6d037c2c6089967e
-
-
+python Search.py AIzaSyDI07bUpnPo2QrQaNRza54wYpz3BlldbRY e6d037c2c6089967e 1.0 "cases"
 
 
 

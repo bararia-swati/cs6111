@@ -84,7 +84,7 @@ class Laddered_Query_Order:
                         permutation_to_frequency[n][clean_bin_corpus[i:i+n]]=1
         return permutation_to_frequency
 
-#returns the permutation with max frequeny using the map created above
+#returns the permutation with max frequency, starting with permutations of length k, then k-1 and so on
     def get_query_ordering(self,permutation_to_frequency, k):
         #n in range k to 2
         max_frequency = -math.inf

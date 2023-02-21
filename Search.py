@@ -105,13 +105,11 @@ def main():
                 original_format_query_li.append(query_term)
 
         original_format_query = " ".join(original_format_query_li)
-        #print(" New Query : ",original_format_query)
         print("Query       = ",original_format_query)
         print("Precision   = ",precision)
         docdict, NUM_VALID_WEBPAGES = run(JsonApiKey, EngineID, original_format_query,doc_id)
 
         doc_id += NUM_VALID_WEBPAGES
-        #print("docdict: ",docdict)
         currentPrecision = float(calculate_precision(docdict, NUM_VALID_WEBPAGES))
         print("======================")
         print("FEEDBACK SUMMARY")
@@ -171,10 +169,9 @@ def main():
         print("Augmenting by ",query_expansion_terms)
 
         query_li.extend(query_expansion_terms)
-
         query = query + " " + " ".join(query_expansion_terms)
 
-        #Now, query ordering
+        #Optimal Query Term ordering using the Laddered_Query_Order class
         Query_Orderer = Laddered_Query_Order(query_li, original_initial_query_to_preprocessed_query_map)
         ordered_query_li = Query_Orderer.execute(docdict)
 
@@ -189,8 +186,8 @@ def main():
     print("Desired precision reached, done!")
 
 def get_processed_text_docdict(docdict):
-    #preprocess the text
-    #returns the processed text
+    #preprocess the text: clean, remove stopwords, lemmatize, etc.
+    #Implemented in the Preprocess class
     preprocessor = Preprocess()
     for doc_id, doc_entry in docdict.items():
         doc_text = doc_entry['snippet']

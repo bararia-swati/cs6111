@@ -1,12 +1,4 @@
 
-#Write a Class called Preprocess that has the following methods:
-#remove_stopwords
-#remove_punctuation_and_numbers
-#lemmatize
-#stem
-#remove_short_words
-
-
 import nltk
 import spacy
 import re
@@ -96,6 +88,7 @@ class Preprocess:
 
 
 """
+Tests
 TextProcessor = Preprocess()
 original_text = "This is a test sentence with covid-19. It has punctuation, numbers 123, and short words like a, an, and the."
 print("Original Text: ", original_text)

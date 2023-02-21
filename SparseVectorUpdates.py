@@ -62,6 +62,7 @@ class SparseVectorUpdates:
         tf=0.0
         idf=0.0
 
+        #We experimented with smooting the denominator to reduce the severity of the IDF penalty. In practice, got good results with 0.0
         IDF_SMOOTHING_CONSTANT = 0
 
         for word, doc_id in self.relevant_term_frequency_dict.keys():
@@ -119,7 +120,6 @@ class SparseVectorUpdates:
 
             if self.query_vector[term] < 0:
                 self.query_vector[term] = 0
-
 
         #print("Query Vector: ", sorted(self.query_vector.items(), key=lambda x: x[1], reverse=True))
         return 
